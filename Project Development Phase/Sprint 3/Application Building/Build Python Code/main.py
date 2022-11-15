@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__,template_folder="template")
 @app.route("/")
 def home():
-    return render_template("home.html")
+    return render_template("index.html")
 
 @app.route("/process", methods=['GET', 'POST'])
 def process():
@@ -118,15 +118,6 @@ def process():
         cap.release()
         cv2.destroyAllWindows()
 
-    return render_template("index.html")
-
-
-@app.route("/intro")
-def intro_page():
-    return render_template("intro.html")
-
-@app.route("/index")
-def index_page():
     return render_template("index.html")
 
 if __name__ == '__main__':
