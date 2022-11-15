@@ -111,13 +111,22 @@
                 font-weight: bold;
                 font-size: 1.5rem;
                 ">Provide an Image for which you want to perform various operation</p>
-                <div class="file-field input-field">
-                    <div class="btn btn-upload">
+                <form action="/process" method="post" enctype="multipart/form-data">
+                    <div 
+                        class="btn btn-upload file-field input-field form-group" 
+                        style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        ">
                         Upload
                         <i class="material-icons right">send</i>
-                        <input id="upload_image" type="file" multiple>
+                        <input id="upload_image" name="upload_image" type="file" multiple>
                     </div>
-                </div>
+                    <button type="submit" class="btn btn-upload" style="padding: 0 2.5rem;">
+                        Capture
+                    </button>
+                </form>
             </section>
 
             <section class="sec-2">
