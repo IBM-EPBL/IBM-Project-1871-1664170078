@@ -1,124 +1,150 @@
-import mediapipe as mp
+from flask import Flask,render_template,request
 import numpy as np
-from flask import Flask, render_template, request
-import cv2
 import os
-import pandas as pd
-import tensorflow as tf
-from tensorflow import keras
+import operator
+import cv2
+import tensorflow
+from tensorflow import keras 
 from keras.models import load_model
+from keras.utils import load_img, img_to_array
 from werkzeug.utils import secure_filename
 
-
 app = Flask(__name__,template_folder="template")
-@app.route("/")
-def home():
+model=load_model('Project Development Phase\Sprint 3\Application Building\Build Python Code\static\gesture.h5')
+print("Model is loaded from local system")
+
+@app.route('/',methods=['GET','POST'])
+def index():
     return render_template("index.html")
 
-@app.route("/process", methods=['GET', 'POST'])
-def process():
+@app.route('/process',methods=['GET','POST'])
+def predict():
+    #Getting input and storing it
     if request.method == 'POST':
-        upload_image = request.files['upload_image']
+        print('inside launch function')
+        f=request.files['upload_image']
+
         basepath=os.path.dirname(__file__)
-        file_path=os.path.join(basepath,'static',secure_filename(upload_image.filename))
-        upload_image.save(file_path)
-        model1 = tf.keras.models.load_model('Project Development Phase\Sprint 2\gesture.h5')
-        mpHands = mp.solutions.hands
-        hands = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.5, min_tracking_confidence=0.5)
-        mpDraw = mp.solutions.drawing_utils
-        cap = cv2.VideoCapture(0)
-        while True:
-            _, frame = cap.read()
+        file_path=os.path.join(basepath,'uploads',secure_filename(f.filename))
+        f.save(file_path)
+        print('img saved successfully')
+        print(file_path)
+        # test_image=cv2.imread(file_path,cv2.IMREAD_COLOR)
+        # test_image=cv2.resize(test_image,(64,64))
+        # result= model.predict(test_image.reshape(1,64,64,1))
 
-           # h, w, c = frame.shape()
+        # img = load_img(file_path, grayscale=True, target_size=(64, 64))
+        # x = img_to_array(img)
+        # x = np.expand_dims(x, axis = 0)
 
-            frame = cv2.flip(frame, 1)
-            print("frame debug:",frame)
-            framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    cap=cv2.VideoCapture(0)
+    image1=cv2.imread(file_path)
+    cv2.imshow("Output",image1)
+    prev='NULL'
+    while True:
+        _, frame=cap.read()
+        frame=cv2.flip(frame,1)
 
-            result = hands.process(framergb)
-            res = ''
+        x1=int(0.5*frame.shape[1])
+        y1=10
+        x2=frame.shape[1]-10
+        y2=int(0.5*frame.shape[1])
 
-            if result.multi_hand_landmarks:
-                landmarks = []
-                for handslms in result.multi_hand_landmarks:
-                    x_max = 0
-                    y_max = 0
-                    x_min = w
-                    y_min = h
-                    for lm in handslms.landmark:
-                        x = int(lm.x * w)
-                        y = int(lm.y * h)
+        cv2.rectangle(frame,(x1-1,y1-1),(x2+1,y2+1),(255,0,0)),1
+        roi = frame[y1:y2,x1:x2]
 
-                        landmarks.append([x, y])
-                        if x > x_max:
-                            x_max = x
-                        if x < x_min:
-                            x_min = x
-                        if y > y_max:
-                            y_max = y
-                        if y < y_min:
-                            y_min = y
-                    cv2.rectangle(frame, (x_min - 5, y_min - 5), (x_max + 5, y_max + 5), (0, 255, 0), 2)
-                    framegray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                    hand = framegray[y_min - 5:y_max + 5, x_min - 5:x_max + 5]
-                    hand = cv2.resize(hand, (128, 128))
-                    hand = hand / 255
-                    hand = hand.reshape(128, 128, 1)
-                    hand = np.expand_dims(hand, axis=0)
-                    mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
-                    prediction = model1.predict(hand)
-                    res = np.argmax(prediction)
-                    image1 = cv2.imread(file_path)
-                    image1= cv2.resize(image1,(300,300))
-                    if res==1:
-                        resized = cv2.resize(image1, (200, 200))
-                        cv2.imshow("Resizing", resized)
-                        key=cv2.waitKey(3000)
+        roi=cv2.resize(roi,(64,64))
+        roi=cv2.cvtColor(roi,cv2.COLOR_BGR2GRAY)
+        _, test_image=cv2.threshold(roi,120,255,cv2.THRESH_BINARY)
+        ##cv2.imshow("test",test_image)
 
-                        if (key & 0xFF) == ord("1"):
-                            cv2.destroyWindow("Resizing")
+        result = model.predict(test_image.reshape(1,64,64,1))
+        print(result)
+        prediction = {'ZERO':result[0][0],'ONE':result[0][1],'TWO':result[0][2],'THREE':result[0][3],'FOUR':result[0][4],'FIVE':result[0][5]}
+        prediction=sorted(prediction.items(),key=operator.itemgetter(1),reverse=True)
 
-                    elif res==2:
-                        blurred = cv2.GaussianBlur(image1, (21, 21), 0)
-                        cv2.imshow("Blurred", blurred)
-                        key=cv2.waitKey(3000)
-                        if (key & 0xFF) == ord("3"):
-                            cv2.destroyWindow("Blurred")
-
-                    elif res==3:
-                        (h, w, d) = image1.shape
-                        center = (w // 2, h // 2)
-                        M = cv2.getRotationMatrix2D(center, -45, 1.0)
-                        rotated = cv2.warpAffine(image1, M, (w, h))
-                        cv2.imshow("OpenCV Rotation", rotated)
-                        key=cv2.waitKey(3000)
-                        if (key & 0xFF) == ord("2"):
-                            cv2.destroyWindow("OpenCV Rotation")
-
-                    
-                    elif res==4:
-                        cv2.rectangle(image1, (480, 170), (650, 420), (0, 0, 255), 2)
-                        cv2.imshow("Rectangle", image1)
-                        cv2.waitKey(0)
-                        key=cv2.waitKey(3000)
-                        if (key & 0xFF) == ord("0"):
-                            cv2.destroyWindow("Rectangle")
+        cv2.putText(frame,prediction[0][0],(10,120), cv2.FONT_HERSHEY_PLAIN,1,(0,255,255),1)
+        cv2.imshow("frame",frame)
 
 
-                    else:
-                        continue
+        interrupt=cv2.waitKey(10)
+        if interrupt & 0xFF == 27: #Esc key to break from the while loop
+            break
+        
+        if prev == prediction:
+                continue
 
-            
-            cv2.imshow("Output", frame)
+        prev = prediction
 
-            if cv2.waitKey(1) == ord('q'):
-                break
 
-        cap.release()
-        cv2.destroyAllWindows()
+        image1=cv2.imread(file_path)
+        if prediction[0][0]=='ONE':
+            resized=cv2.resize(image1,(200,200))
+            cv2.destroyWindow("Output")            
+            cv2.imshow("Output",resized)
+##            key=cv2.waitKey(3000)
+##
+##            if(key & 0xFF) == ord("1"):
+##                cv2.destroyWindow("Fixed Resizing - One")
+
+        elif prediction[0][0]=='ZERO':
+            cv2.rectangle(image1,(480,170),(650,420),(0,0,255),2)
+            cv2.destroyWindow("Output")            
+            cv2.imshow("Output",image1)
+            #cv2.imshow("Rectangle - Zero",image1)
+            #cv2.waitKey(0)
+##            key=cv2.waitKey(3000)
+##
+##            if(key & 0xFF)==ord("0"):
+##             cv2.destroyWindow("Rectangle - Zero")
+
+        elif prediction[0][0]=='TWO':
+            (h,w,d)=image1.shape
+            center=(w//2,h//2)
+            M=cv2.getRotationMatrix2D(center,-45,1.0)
+            rotated=cv2.warpAffine(image1,M,(w,h))
+            cv2.destroyWindow("Output")            
+            cv2.imshow("Output",rotated)
+##            cv2.imshow("OpenCV Rotation - Two",rotated)
+##            key=cv2.waitKey(3000)
+##            if(key & 0xFF)==ord("2"):
+##                cv2.destroyWindow("OpenCV Rotation - Two")
+
+        elif prediction[0][0]=='THREE':
+            blurred=cv2.GaussianBlur(image1,(11,11),0)
+            cv2.destroyWindow("Output")            
+            cv2.imshow("Output",blurred)
+##            cv2.imshow("Blurred - Three",blurred)
+##            key=cv2.waitKey(3000)
+##            if(key & 0xFF)==ord("3"):
+##                cv2.destroyWindow("Blurred - Three")
+
+        elif prediction[0][0]=='FOUR':
+            zoomed=cv2.resize(image1,(400,400))
+            cv2.destroyWindow("Output")            
+            cv2.imshow("Output",zoomed)
+##            cv2.imshow("Zoomed - Four",zoomed)
+##            key=cv2.waitKey(3000)
+##            if(key & 0xFF)==ord("4"):
+##                cv2.destroyWindow("Zoomed - Four")
+
+        elif prediction[0][0]=='FIVE':
+            neg=255-image1
+            cv2.destroyWindow("Output")            
+            cv2.imshow("Output",neg)
+##            cv2.imshow("Negative - Five",neg)
+##            key=cv2.waitKey(3000)
+##            if(key & 0xFF)==ord("5"):
+##                cv2.destroyWindow("Negative - Five")
+
+        else:
+            continue
+
+
+    cap.release()
+    cv2.destroyAllWindows()
 
     return render_template("index.html")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+	app.run(debug=True)
