@@ -1,4 +1,4 @@
-checkpoint = ModelCheckpoint(r'D:\IBM Project\gesture.h5',
+checkpoint = ModelCheckpoint(r'Project Development Phase\Sprint 2\gesture.h5',
                             monitor='val_loss',save_best_only=True,verbose=3)
 
 earlystop = EarlyStopping(monitor = 'val_loss', patience=7, verbose= 3, restore_best_weights=True)

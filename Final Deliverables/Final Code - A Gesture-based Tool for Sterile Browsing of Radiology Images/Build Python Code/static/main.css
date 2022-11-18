@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;1,200;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600&display=swap');
+
+body {
+    position: relative;
+    /* background-color: li; */
+    height: 100vh;
+    background-image: linear-gradient(150deg, #f96, #ff5e62);
+    font-family: 'Raleway', sans-serif;
+    font-weight: bold;
+    font-style: italic;
+    background-repeat: no-repeat;
+    background-position: center;
+    overflow-y: scroll;
+}
+
+.col {
+    width: 100%;
+    height: 90vh;
+    position: absolute;
+    top: 10vh;
+}
+
+#mobile-nav {
+    width: 30vw !important;
+    background-color: #080f1c;
+}
+
+.tabs {
+    width: fit-content !important;
+}
+
+.tabs .indicator {
+    background-color: #f96 !important;
+}
+
+.tab {
+    line-height: inherit !important;
+}
+
+.tab>a {
+    color: beige !important;
+}
+
+.tabs>.tab>.active {
+    color: #f96 !important;
+}
+
+.translate {
+    transform: translateX(-105%) !important;
+}
+
+.btn-upload,
+.btn-upload>a {
+    background-color: #080f1c !important;
+    font-weight: 600;
+    color: beige !important;
+    font-size: 20px !important;
+    border-radius: 100px !important;
+}
+
+.btn-upload:hover,
+.btn-upload:hover>a {
+    background-color: #1d293f !important;
+}
+
+.btn-upload>span {
+    display: none;
+}
+
+.preview {
+    height: 300px;
+    width: 300px;
+    background-color: transparent;
+    border: 2px solid #242424;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    background-position: center;
+    background-size: cover;
+}
+
+.sec {
+    height: 100%;
+    display: flex !important;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.sec-1 {
+    display: flex;
+    width: 50%;
+    flex-direction: column;
+    align-items: end;
+}
+
+.sec-2 {
+    display: flex;
+    flex-direction: column;
+}
+
+.intro {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80%;
+    margin: 0 20px;
+}
+
+.intro>p {
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.hero {
+    width: 50%;
+}
+
+.title {
+    text-align: center;
+}
+
+.sec-5 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 50px;
+    width: fit-content;
+    height: 100%;
+}
+
+@media only screen and (max-width: 700px) {
+    .sec {
+        flex-direction: column;
+        justify-content: start;
+        align-items: center;
+    }
+
+    .sec-1 {
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    h1,
+    p {
+        text-align: center;
+    }
+
+    .sec-5 {
+        flex-direction: column-reverse;
+        align-items: center;
+    }
+
+    .title {
+        margin-bottom: 4rem;
+    }
+
+    p {
+        font-size: 18px !important;
+    }
+
+    .hero {
+        width: 100%;
+    }
+}
+
+.block {
+    display: block !important;
+}
+
+.none {
+    display: none;
+}

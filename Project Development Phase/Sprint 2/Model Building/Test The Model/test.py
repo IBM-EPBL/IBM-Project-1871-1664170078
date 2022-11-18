@@ -1,5 +1,7 @@
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
+import tensorflow as tf
+from tensorflow import keras
+from keras.models import load_model
+from keras.preprocessing import image
 model=load_model(r'D:\IBM Project\gesture.h5')
 categories=['0','1','2','3','4','5']
 test_img=image.load_img(r'Downloads\OIP4 image.jpg',target_size=(80,80),color_mode='grayscale')
